@@ -76,7 +76,7 @@ function App() {
 
               <h2>Kullanım Talimatları:</h2>
               <ol>
-                <li>Şu formatta JSON yükle: <code>{`{"startLatitude": 59.44, "startLongitude": 24.75, "customerIds": [123, 456, 789]}`}</code></li>
+                <li>Şu formatta JSON yükle: <code>{`{"startLatitude": 41.0082, "startLongitude": 28.9784, "customers": [{"myId": 101, "latitude": 41.0180, "longitude": 28.9647}]}`}</code></li>
                 <li>"Rotayı Optimize Et" butonuna tıkla</li>
                 <li>Optimize edilmiş sonuçları görüntüle</li>
               </ol>
@@ -94,7 +94,7 @@ function App() {
                   <div className="uploaded-data">
                     <h3>Yüklenen Veri:</h3>
                     <p>Başlangıç: {state.uploadedData.startLatitude}, {state.uploadedData.startLongitude}</p>
-                    <p>Müşteri Sayısı: {state.uploadedData.customerIds.length}</p>
+                    <p>Müşteri Sayısı: {state.uploadedData.customers.length}</p>
                   </div>
               )}
 
