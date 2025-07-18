@@ -28,21 +28,33 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, onError }) => {
                 const jsonData = JSON.parse(content);
 
                 // Validate required fields
-                if (!jsonData.startLatitude || !jsonData.startLongitude || !jsonData.customerIds) {
-                    throw new Error('JSON dosyasında gerekli alanlar eksik (startLatitude, startLongitude, customerIds)');
+                if (!jsonData.startLatitude || !jsonData.startLongitude || !jsonData.customers) {
+                    throw new Error('JSON dosyasında gerekli alanlar eksik (startLatitude, startLongitude, customers)');
                 }
 
                 // Validate data types
                 if (typeof jsonData.startLatitude !== 'number' ||
                     typeof jsonData.startLongitude !== 'number' ||
-                    !Array.isArray(jsonData.customerIds)) {
+                    !Array.isArray(jsonData.customers)) {
                     throw new Error('JSON dosyasındaki veri tipleri hatalı');
                 }
 
-                // Validate customerIds array
-                if (jsonData.customerIds.length === 0) {
-                    throw new Error('En az bir müşteri ID\'si gerekli');
+                // Validate customers array
+                if (jsonData.customers.length === 0) {
+                    throw new Error('En az bir müşteri gerekli');
                 }
+
+                // Validate each customer object
+                jsonData.customers.forEach((customer: any, index: number) => {
+                    if (!customer.myId || !customer.latitude || !customer.longitude) {
+                        throw new Error(`Müşteri ${index + 1}: myId, latitude, longitude gerekli`);
+                    }
+                    if (typeof customer.myId !== 'number' ||
+                        typeof customer.latitude !== 'number' ||
+                        typeof customer.longitude !== 'number') {
+                        throw new Error(`Müşteri ${index + 1}: veri tipleri hatalı (sayı olmalı)`);
+                    }
+                });
 
                 onFileUpload(jsonData as RouteRequest);
             } catch (error) {
