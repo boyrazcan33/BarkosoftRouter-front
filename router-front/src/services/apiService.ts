@@ -10,7 +10,7 @@ const apiClient = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    timeout: 120000, // 120 seconds timeout
+    timeout: 300000, // 300 seconds timeout
 });
 
 // API service for route optimization
