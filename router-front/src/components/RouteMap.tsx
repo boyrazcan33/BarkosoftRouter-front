@@ -133,6 +133,7 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                 {/* Start marker */}
                 <Marker
                     position={[startLatitude, startLongitude]}
+                    // @ts-ignore
                     icon={startIcon}
                 >
                     <Popup>
@@ -150,6 +151,7 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                         <Marker
                             key={customerId}
                             position={[customer.latitude, customer.longitude]}
+                            // @ts-ignore
                             icon={createNumberedIcon(index + 1)}
                         >
                             <Popup>
