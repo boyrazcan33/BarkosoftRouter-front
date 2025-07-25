@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import FileUpload from './components/FileUpload';
 import ResultsDisplay from './components/ResultsDisplay';
+import RouteMap from './components/RouteMap';
 import { routeService } from './services/apiService';
 import { RouteRequest, RouteResponse, AppState } from './types';
 import './App.scss';
@@ -116,6 +117,15 @@ function App() {
 
             {state.result && (
                 <ResultsDisplay result={state.result} />
+            )}
+
+            {state.result && state.uploadedData && (
+                <RouteMap
+                    startLatitude={state.uploadedData.startLatitude}
+                    startLongitude={state.uploadedData.startLongitude}
+                    customers={state.uploadedData.customers}
+                    result={state.result}
+                />
             )}
           </main>
 
