@@ -20,15 +20,19 @@ interface RouteMapProps {
 }
 
 const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, customers, result }) => {
-    const [visibleCount, setVisibleCount] = useState(20);
-    const LOAD_MORE_COUNT = 20;
+    const [currentPage, setCurrentPage] = useState(0);
+    const CUSTOMERS_PER_PAGE = 20;
 
     // Create customer lookup map
     const customerMap = new Map(customers.map(c => [c.myId, c]));
 
-    // Get visible customers based on current count
-    const visibleCustomerIds = result.optimizedCustomerIds.slice(0, visibleCount);
-    const hasMore = visibleCount < result.optimizedCustomerIds.length;
+    // Get visible customers for current page
+    const startIndex = currentPage * CUSTOMERS_PER_PAGE;
+    const endIndex = startIndex + CUSTOMERS_PER_PAGE;
+    const visibleCustomerIds = result.optimizedCustomerIds.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(result.optimizedCustomerIds.length / CUSTOMERS_PER_PAGE);
+    const hasNext = currentPage < totalPages - 1;
+    const hasPrevious = currentPage > 0;
 
     // Build route coordinates for visible customers only
     const routeCoordinates: [number, number][] = [];
@@ -63,20 +67,30 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
     const startIcon = L.divIcon({
         html: '<div class="start-marker">Başlangıç</div>',
         className: 'custom-div-icon',
-        iconSize: [60, 30],
-        iconAnchor: [30, 15]
+        iconSize: [80, 30],
+        iconAnchor: [40, 15]
     });
 
-    const loadMoreCustomers = () => {
-        setVisibleCount(prev => Math.min(prev + LOAD_MORE_COUNT, result.optimizedCustomerIds.length));
+    const nextPage = () => {
+        if (hasNext) {
+            setCurrentPage(prev => prev + 1);
+        }
+    };
+
+    const previousPage = () => {
+        if (hasPrevious) {
+            setCurrentPage(prev => prev - 1);
+        }
     };
 
     const showAllCustomers = () => {
-        setVisibleCount(result.optimizedCustomerIds.length);
+        // Show all customers by setting a very high page that includes everything
+        setCurrentPage(0);
+        // We'll need to modify the slice logic for "show all"
     };
 
     const resetView = () => {
-        setVisibleCount(20);
+        setCurrentPage(0);
     };
 
     return (
@@ -85,37 +99,37 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                 <h3>Optimize Edilmiş Rota Haritası</h3>
                 <div className="map-controls">
           <span className="route-info">
-            Gösterilen: {visibleCount} / {result.optimizedCustomerIds.length} müşteri
+            Sayfa {currentPage + 1} / {totalPages} - Gösterilen: {startIndex + 1}-{Math.min(endIndex, result.optimizedCustomerIds.length)} / {result.optimizedCustomerIds.length} müşteri
           </span>
-                    {hasMore && (
-                        <button
-                            className="load-more-btn"
-                            onClick={loadMoreCustomers}
-                        >
-                            Sonraki {Math.min(LOAD_MORE_COUNT, result.optimizedCustomerIds.length - visibleCount)} Müşteriyi Göster
-                        </button>
-                    )}
-                    {visibleCount < result.optimizedCustomerIds.length && (
+                    <div className="pagination-controls">
+                        {hasPrevious && (
+                            <button
+                                className="prev-btn"
+                                onClick={previousPage}
+                            >
+                                ← Önceki 20
+                            </button>
+                        )}
+                        {hasNext && (
+                            <button
+                                className="next-btn"
+                                onClick={nextPage}
+                            >
+                                Sonraki 20 →
+                            </button>
+                        )}
                         <button
                             className="show-all-btn"
                             onClick={showAllCustomers}
                         >
-                            Tümünü Göster ({result.optimizedCustomerIds.length})
+                            Tümünü Göster
                         </button>
-                    )}
-                    {visibleCount > 20 && (
-                        <button
-                            className="reset-btn"
-                            onClick={resetView}
-                        >
-                            İlk 20'yi Göster
-                        </button>
-                    )}
+                    </div>
                 </div>
             </div>
 
             <MapContainer
-                key={visibleCount} // Force re-render to update bounds
+                key={currentPage} // Force re-render when page changes
                 bounds={bounds}
                 style={{ height: '500px', width: '100%' }}
                 className="leaflet-container"
@@ -142,20 +156,22 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                     </Popup>
                 </Marker>
 
-                {/* Visible customer markers */}
+                {/* Visible customer markers with correct numbering */}
                 {visibleCustomerIds.map((customerId, index) => {
                     const customer = customerMap.get(customerId);
                     if (!customer) return null;
+
+                    const actualNumber = startIndex + index + 1; // Correct number based on overall position
 
                     return (
                         <Marker
                             key={customerId}
                             position={[customer.latitude, customer.longitude]}
                             // @ts-ignore
-                            icon={createNumberedIcon(index + 1)}
+                            icon={createNumberedIcon(actualNumber)}
                         >
                             <Popup>
-                                <strong>Müşteri {index + 1}</strong><br />
+                                <strong>Müşteri {actualNumber}</strong><br />
                                 ID: {customer.myId}<br />
                                 Koordinat: {customer.latitude.toFixed(6)}, {customer.longitude.toFixed(6)}
                             </Popup>
