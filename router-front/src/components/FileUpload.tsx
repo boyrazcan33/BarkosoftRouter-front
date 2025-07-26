@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 import { RouteRequest } from '../types';
 import './FileUpload.scss';
 
@@ -8,6 +9,7 @@ interface FileUploadProps {
 }
 
 const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, onError }) => {
+    const { t } = useLanguage();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,7 +18,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, onError }) => {
 
         // Check if file is JSON
         if (!file.name.endsWith('.json')) {
-            onError('Lütfen geçerli bir JSON dosyası seçin');
+            onError(t.selectValidJson);
             return;
         }
 
@@ -29,36 +31,36 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, onError }) => {
 
                 // Validate required fields
                 if (!jsonData.startLatitude || !jsonData.startLongitude || !jsonData.customers) {
-                    throw new Error('JSON dosyasında gerekli alanlar eksik (startLatitude, startLongitude, customers)');
+                    throw new Error(t.missingRequiredFields);
                 }
 
                 // Validate data types
                 if (typeof jsonData.startLatitude !== 'number' ||
                     typeof jsonData.startLongitude !== 'number' ||
                     !Array.isArray(jsonData.customers)) {
-                    throw new Error('JSON dosyasındaki veri tipleri hatalı');
+                    throw new Error(t.incorrectDataTypes);
                 }
 
                 // Validate customers array
                 if (jsonData.customers.length === 0) {
-                    throw new Error('En az bir müşteri gerekli');
+                    throw new Error(t.atLeastOneCustomer);
                 }
 
                 // Validate each customer object
                 jsonData.customers.forEach((customer: any, index: number) => {
                     if (!customer.myId || !customer.latitude || !customer.longitude) {
-                        throw new Error(`Müşteri ${index + 1}: myId, latitude, longitude gerekli`);
+                        throw new Error(`${t.customer} ${index + 1}: ${t.customerFieldsRequired}`);
                     }
                     if (typeof customer.myId !== 'number' ||
                         typeof customer.latitude !== 'number' ||
                         typeof customer.longitude !== 'number') {
-                        throw new Error(`Müşteri ${index + 1}: veri tipleri hatalı (sayı olmalı)`);
+                        throw new Error(`${t.customer} ${index + 1}: ${t.customerDataTypesIncorrect}`);
                     }
                 });
 
                 onFileUpload(jsonData as RouteRequest);
             } catch (error) {
-                onError(`JSON dosyası okuma hatası: ${error instanceof Error ? error.message : 'Bilinmeyen hata'}`);
+                onError(`${t.jsonReadError} ${error instanceof Error ? error.message : t.unknownError}`);
             }
         };
 
@@ -83,7 +85,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, onError }) => {
                 onClick={handleClick}
                 type="button"
             >
-                JSON Dosyası Seç
+                {t.selectJsonFile}
             </button>
         </div>
     );
