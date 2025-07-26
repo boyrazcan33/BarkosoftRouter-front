@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
+import LanguageSelector from './components/LanguageSelector';
 import FileUpload from './components/FileUpload';
 import ResultsDisplay from './components/ResultsDisplay';
 import RouteMap from './components/RouteMap';
@@ -6,7 +8,8 @@ import { routeService } from './services/apiService';
 import { RouteRequest, RouteResponse, AppState } from './types';
 import './App.scss';
 
-function App() {
+const AppContent: React.FC = () => {
+  const { t } = useLanguage();
   const [state, setState] = useState<AppState>({
     isLoading: false,
     error: null,
@@ -33,7 +36,7 @@ function App() {
 
   const handleOptimize = async () => {
     if (!state.uploadedData) {
-      handleError('Lütfen önce bir JSON dosyası yükleyin');
+      handleError(t.pleaseUploadJson);
       return;
     }
 
@@ -51,7 +54,7 @@ function App() {
       setState(prev => ({
         ...prev,
         isLoading: false,
-        error: error instanceof Error ? error.message : 'Bilinmeyen bir hata oluştu'
+        error: error instanceof Error ? error.message : t.unknownError
       }));
     }
   };
@@ -60,29 +63,30 @@ function App() {
       <div className="app">
         <div className="container">
           <header className="app-header">
-            <h1>Rota Optimizasyonu API Test Arayüzü</h1>
-            <p className="description">
-              Bu basit test aracı, rota optimizasyonu API servisini test etmek ve göstermek için tasarlanmıştır.
-            </p>
+            <h1>{t.appTitle}</h1>
+            <p className="description">{t.appDescription}</p>
           </header>
 
           <main className="app-main">
             <section className="info-section">
-              <h2>Ne yapar:</h2>
+              <div className="info-header">
+                <h2>{t.whatItDoes}</h2>
+                <LanguageSelector />
+              </div>
               <ul>
-                <li>Başlangıç koordinatları ve müşteri ID'leri içeren JSON dosyası yükler</li>
-                <li>OSRM kullanarak optimize edilmiş rota almak için backend API'yi çağırır</li>
-                <li>Optimize edilmiş müşteri sırasını ve toplam mesafeyi gösterir</li>
+                {t.whatItDoesItems.map((item, index) => (
+                    <li key={index}>{item}</li>
+                ))}
               </ul>
 
-              <h2>Kullanım Talimatları:</h2>
+              <h2>{t.usageInstructions}</h2>
               <ol>
-                <li>Şu formatta JSON yükle: <code>{`{"startLatitude": 41.0082, "startLongitude": 28.9784, "customers": [{"myId": 101, "latitude": 41.0180, "longitude": 28.9647}]}`}</code></li>
-                <li>"Rotayı Optimize Et" butonuna tıkla</li>
-                <li>Optimize edilmiş sonuçları görüntüle</li>
+                {t.usageSteps.map((step, index) => (
+                    <li key={index}>{step}</li>
+                ))}
               </ol>
 
-              <p><strong>Test Edilen API Endpoint:</strong> <code>POST /api/route/optimize</code></p>
+              <p><strong>{t.testedEndpoint}</strong> <code>POST /api/route/optimize</code></p>
             </section>
 
             <section className="upload-section">
@@ -93,9 +97,9 @@ function App() {
 
               {state.uploadedData && (
                   <div className="uploaded-data">
-                    <h3>Yüklenen Veri:</h3>
-                    <p>Başlangıç: {state.uploadedData.startLatitude}, {state.uploadedData.startLongitude}</p>
-                    <p>Müşteri Sayısı: {state.uploadedData.customers.length}</p>
+                    <h3>{t.uploadedData}</h3>
+                    <p>{t.startingPoint} {state.uploadedData.startLatitude}, {state.uploadedData.startLongitude}</p>
+                    <p>{t.customerCount} {state.uploadedData.customers.length}</p>
                   </div>
               )}
 
@@ -104,13 +108,13 @@ function App() {
                   onClick={handleOptimize}
                   disabled={!state.uploadedData || state.isLoading}
               >
-                {state.isLoading ? 'Optimize ediliyor...' : 'Rotayı Optimize Et'}
+                {state.isLoading ? t.optimizing : t.optimizeRoute}
               </button>
             </section>
 
             {state.error && (
                 <div className="error-message">
-                  <h3>Hata:</h3>
+                  <h3>{t.error}</h3>
                   <p>{state.error}</p>
                 </div>
             )}
@@ -130,10 +134,18 @@ function App() {
           </main>
 
           <footer className="app-footer">
-            <p><strong>Not:</strong> Bu sadece bir test arayüzüdür. Üretimde şirketler bu frontend'i kullanmadan doğrudan API endpoint'i ile entegre olurlar.</p>
+            <p>{t.footerNote}</p>
           </footer>
         </div>
       </div>
+  );
+};
+
+function App() {
+  return (
+      <LanguageProvider>
+        <AppContent />
+      </LanguageProvider>
   );
 }
 
