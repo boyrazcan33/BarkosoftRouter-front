@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
+import { useLanguage } from '../contexts/LanguageContext';
 import { RouteResponse } from '../types';
 import './RouteMap.scss';
 
@@ -20,6 +21,7 @@ interface RouteMapProps {
 }
 
 const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, customers, result }) => {
+    const { t } = useLanguage();
     const [currentPage, setCurrentPage] = useState(0);
     const CUSTOMERS_PER_PAGE = 20;
 
@@ -65,7 +67,7 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
 
     // Create start icon
     const startIcon = L.divIcon({
-        html: '<div class="start-marker">Başlangıç</div>',
+        html: `<div class="start-marker">${t.startingPointMarker}</div>`,
         className: 'custom-div-icon',
         iconSize: [80, 30],
         iconAnchor: [40, 15]
@@ -96,10 +98,10 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
     return (
         <div className="route-map">
             <div className="map-header">
-                <h3>Optimize Edilmiş Rota Haritası</h3>
+                <h3>{t.optimizedRouteMap}</h3>
                 <div className="map-controls">
           <span className="route-info">
-            Sayfa {currentPage + 1} / {totalPages} - Gösterilen: {startIndex + 1}-{Math.min(endIndex, result.optimizedCustomerIds.length)} / {result.optimizedCustomerIds.length} müşteri
+            {t.page} {currentPage + 1} / {totalPages} - {t.showing} {startIndex + 1}-{Math.min(endIndex, result.optimizedCustomerIds.length)} / {result.optimizedCustomerIds.length} {t.customers}
           </span>
                     <div className="pagination-controls">
                         {hasPrevious && (
@@ -107,7 +109,7 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                                 className="prev-btn"
                                 onClick={previousPage}
                             >
-                                ← Önceki 20
+                                {t.previous}
                             </button>
                         )}
                         {hasNext && (
@@ -115,14 +117,14 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                                 className="next-btn"
                                 onClick={nextPage}
                             >
-                                Sonraki 20 →
+                                {t.next}
                             </button>
                         )}
                         <button
                             className="show-all-btn"
                             onClick={showAllCustomers}
                         >
-                            Tümünü Göster
+                            {t.showAll}
                         </button>
                     </div>
                 </div>
@@ -151,8 +153,8 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                     icon={startIcon}
                 >
                     <Popup>
-                        <strong>Başlangıç Noktası</strong><br />
-                        Koordinat: {startLatitude.toFixed(6)}, {startLongitude.toFixed(6)}
+                        <strong>{t.startingPointMarker}</strong><br />
+                        {t.coordinate} {startLatitude.toFixed(6)}, {startLongitude.toFixed(6)}
                     </Popup>
                 </Marker>
 
@@ -171,9 +173,9 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                             icon={createNumberedIcon(actualNumber)}
                         >
                             <Popup>
-                                <strong>Müşteri {actualNumber}</strong><br />
+                                <strong>{t.customer} {actualNumber}</strong><br />
                                 ID: {customer.myId}<br />
-                                Koordinat: {customer.latitude.toFixed(6)}, {customer.longitude.toFixed(6)}
+                                {t.coordinate} {customer.latitude.toFixed(6)}, {customer.longitude.toFixed(6)}
                             </Popup>
                         </Marker>
                     );
@@ -182,5 +184,3 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
         </div>
     );
 };
-
-export default RouteMap;
