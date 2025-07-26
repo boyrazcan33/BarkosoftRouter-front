@@ -22,6 +22,7 @@ export const routeService = {
             return response.data;
         } catch (error) {
             if (axios.isAxiosError(error)) {
+                // Return localized error message
                 throw new Error(`API Error: ${error.response?.data?.message || error.message}`);
             }
             throw new Error('An unexpected error occurred');
