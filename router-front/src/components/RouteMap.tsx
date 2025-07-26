@@ -184,3 +184,4 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
         </div>
     );
 };
+export default RouteMap;
