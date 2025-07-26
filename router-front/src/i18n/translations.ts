@@ -68,7 +68,8 @@ export const translations: Record<string, Translations> = {
         usageSteps: [
             'Upload JSON in this format: {"startLatitude": 41.0082, "startLongitude": 28.9784, "customers": [{"myId": 101, "latitude": 41.0180, "longitude": 28.9647}]}',
             'Click "Optimize Route" button',
-            "View optimized results and interactive map"
+            "View optimized results and interactive map",
+            "Processing time: ~2 minutes for 500 clients"
         ],
         testedEndpoint: "Tested API Endpoint:",
 
@@ -92,7 +93,7 @@ export const translations: Record<string, Translations> = {
         previous: "← Previous 20",
         next: "Next 20 →",
         showAll: "Show All",
-        startingPointMarker: "Starting Point",
+        startingPointMarker: "Start",
         coordinate: "Coordinate:",
 
         // Error Messages
@@ -127,7 +128,8 @@ export const translations: Record<string, Translations> = {
         usageSteps: [
             'Şu formatta JSON yükle: {"startLatitude": 41.0082, "startLongitude": 28.9784, "customers": [{"myId": 101, "latitude": 41.0180, "longitude": 28.9647}]}',
             '"Rotayı Optimize Et" butonuna tıkla',
-            "Optimize edilmiş sonuçları ve interaktif haritayı görüntüle"
+            "Optimize edilmiş sonuçları ve interaktif haritayı görüntüle",
+            "İşlem süresi: 500 müşteri için ~2 dakika"
         ],
         testedEndpoint: "Test Edilen API Endpoint:",
 
