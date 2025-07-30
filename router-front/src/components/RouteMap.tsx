@@ -23,22 +23,24 @@ interface RouteMapProps {
 const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, customers, result }) => {
     const { t } = useLanguage();
     const [currentPage, setCurrentPage] = useState(0);
+    const [showAll, setShowAll] = useState(false);
     const CUSTOMERS_PER_PAGE = 20;
 
     // Create customer lookup map
     const customerMap = new Map(customers.map(c => [c.myId, c]));
 
-    // Get visible customers for current page
-    const startIndex = currentPage * CUSTOMERS_PER_PAGE;
-    const endIndex = startIndex + CUSTOMERS_PER_PAGE;
-    const visibleCustomerIds = result.optimizedCustomerIds.slice(startIndex, endIndex);
+    // Get visible customers based on showAll state
+    const visibleCustomerIds = showAll
+        ? result.optimizedCustomerIds
+        : result.optimizedCustomerIds.slice(currentPage * CUSTOMERS_PER_PAGE, (currentPage + 1) * CUSTOMERS_PER_PAGE);
+
     const totalPages = Math.ceil(result.optimizedCustomerIds.length / CUSTOMERS_PER_PAGE);
     const hasNext = currentPage < totalPages - 1;
     const hasPrevious = currentPage > 0;
 
     // Build route coordinates for visible customers only
     const routeCoordinates: [number, number][] = [];
-    routeCoordinates.push([startLatitude, startLongitude]); // Start point
+    routeCoordinates.push([startLatitude, startLongitude]);
 
     visibleCustomerIds.forEach(customerId => {
         const customer = customerMap.get(customerId);
@@ -74,24 +76,24 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
     });
 
     const nextPage = () => {
-        if (hasNext) {
+        if (hasNext && !showAll) {
             setCurrentPage(prev => prev + 1);
         }
     };
 
     const previousPage = () => {
-        if (hasPrevious) {
+        if (hasPrevious && !showAll) {
             setCurrentPage(prev => prev - 1);
         }
     };
 
     const showAllCustomers = () => {
-        // Show all customers by setting a very high page that includes everything
+        setShowAll(true);
         setCurrentPage(0);
-        // We'll need to modify the slice logic for "show all"
     };
 
     const resetView = () => {
+        setShowAll(false);
         setCurrentPage(0);
     };
 
@@ -100,11 +102,17 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
             <div className="map-header">
                 <h3>{t.optimizedRouteMap}</h3>
                 <div className="map-controls">
-          <span className="route-info">
-            {t.page} {currentPage + 1} / {totalPages} - {t.showing} {startIndex + 1}-{Math.min(endIndex, result.optimizedCustomerIds.length)} / {result.optimizedCustomerIds.length} {t.customers}
-          </span>
+                    {!showAll ? (
+                        <span className="route-info">
+                            {t.page} {currentPage + 1} / {totalPages} - {t.showing} {currentPage * CUSTOMERS_PER_PAGE + 1}-{Math.min((currentPage + 1) * CUSTOMERS_PER_PAGE, result.optimizedCustomerIds.length)} / {result.optimizedCustomerIds.length} {t.customers}
+                        </span>
+                    ) : (
+                        <span className="route-info">
+                            {t.showing} {result.optimizedCustomerIds.length} / {result.optimizedCustomerIds.length} {t.customers}
+                        </span>
+                    )}
                     <div className="pagination-controls">
-                        {hasPrevious && (
+                        {!showAll && hasPrevious && (
                             <button
                                 className="prev-btn"
                                 onClick={previousPage}
@@ -112,7 +120,7 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                                 {t.previous}
                             </button>
                         )}
-                        {hasNext && (
+                        {!showAll && hasNext && (
                             <button
                                 className="next-btn"
                                 onClick={nextPage}
@@ -120,18 +128,28 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                                 {t.next}
                             </button>
                         )}
-                        <button
-                            className="show-all-btn"
-                            onClick={showAllCustomers}
-                        >
-                            {t.showAll}
-                        </button>
+                        {!showAll && (
+                            <button
+                                className="show-all-btn"
+                                onClick={showAllCustomers}
+                            >
+                                {t.showAll}
+                            </button>
+                        )}
+                        {showAll && (
+                            <button
+                                className="reset-btn"
+                                onClick={resetView}
+                            >
+                                Reset
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
 
             <MapContainer
-                key={currentPage} // Force re-render when page changes
+                key={showAll ? 'all' : currentPage}
                 bounds={bounds}
                 style={{ height: '500px', width: '100%' }}
                 className="leaflet-container"
@@ -140,13 +158,11 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                {/* Route line for visible customers */}
                 <Polyline
                     positions={routeCoordinates}
                     pathOptions={{ color: "#3388ff", weight: 4, opacity: 0.7 }}
                 />
 
-                {/* Start marker */}
                 <Marker
                     position={[startLatitude, startLongitude]}
                     // @ts-ignore
@@ -158,12 +174,13 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                     </Popup>
                 </Marker>
 
-                {/* Visible customer markers with correct numbering */}
                 {visibleCustomerIds.map((customerId, index) => {
                     const customer = customerMap.get(customerId);
                     if (!customer) return null;
 
-                    const actualNumber = startIndex + index + 1; // Correct number based on overall position
+                    const actualNumber = showAll
+                        ? result.optimizedCustomerIds.indexOf(customerId) + 1
+                        : currentPage * CUSTOMERS_PER_PAGE + index + 1;
 
                     return (
                         <Marker
@@ -184,4 +201,5 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
         </div>
     );
 };
+
 export default RouteMap;
