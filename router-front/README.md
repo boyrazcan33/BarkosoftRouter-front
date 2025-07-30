@@ -1,46 +1,68 @@
-# Getting Started with Create React App
+# Route Optimization API
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Free alternative to Google Maps Route Optimization API .
 
-## Available Scripts
+## Live Demo
 
-In the project directory, you can run:
+🌐 **Frontend:** [http://barkosoft-router.surge.sh](http://barkosoft-router.surge.sh)
 
-### `npm start`
+## Why This Project?
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **100% Free**: Google Route Optimization API costs money, this is completely free
+- **High Performance**: Handles 500+ customers in ~50 seconds
+- **Scalable**: Kafka-based parallel processing for large datasets
+- **Production Ready**: OSRM + Spring Boot + React stack
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Performance vs Google API
 
-### `npm test`
+| Service | 500 Customers | Cost | Features |
+|---------|---------------|------|----------|
+| **This API** | ~50 seconds | FREE | Unlimited requests |
+| Google API | ~10-30 seconds | $$ | Limited free tier |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Technical Architecture
 
-### `npm run build`
+### Scalability with Kafka
+- **Small datasets** (≤50): Direct OSRM processing
+- **Large datasets** (500+): Kafka batch processing (95 customers per batch)
+- **Parallel processing**: 4 concurrent consumers
+- **Fault tolerance**: Retry mechanism with dead letter queue
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Performance Optimizations
+- **Connection pooling**: WebClient with connection reuse
+- **Timeout handling**: 60-second API timeouts
+- **Memory efficient**: Streaming batch results
+- **CDN delivery**: Global deployment via Surge.sh
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Quick Start
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+npm install
+npm start
+```
 
-### `npm run eject`
+## JSON Format
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```json
+{
+  "startLatitude": 41.0082,
+  "startLongitude": 28.9784,  
+  "customers": [
+    {"myId": 101, "latitude": 41.0180, "longitude": 28.9647}
+  ]
+}
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Tech Stack
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+- **Frontend**: React 19 + TypeScript + Leaflet
+- **Backend**: Spring Boot + Kafka + OSRM
+- **Deployment**: Surge.sh + Google Cloud
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## Real-World Usage
 
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Perfect for:
+- Delivery route planning
+- Field service optimization
+- Logistics companies
+- Any business needing route optimization without Google's pricing
