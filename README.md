@@ -4,7 +4,7 @@ Free alternative to Google Maps Route Optimization API .
 
 ## Live Demo
 
-🌐 **Frontend:** [http://barkosoft-router.surge.sh](http://barkosoft-router.surge.sh)
+🌐 **Frontend:** [https://barkosoft-router.vercel.app](http://barkosoft-router.surge.sh)
 
 ## Why This Project?
 
