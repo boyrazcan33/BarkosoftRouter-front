@@ -57,7 +57,7 @@ npm start
 
 - **Frontend**: React 19 + TypeScript + Leaflet
 - **Backend**: Spring Boot + Kafka + OSRM
-- **Deployment**: Surge.sh + Google Cloud
+- **Deployment**: Vercel + Google Cloud
 
 ## Real-World Usage
 
