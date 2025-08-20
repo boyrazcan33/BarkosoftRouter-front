@@ -38,18 +38,45 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
     const hasNext = currentPage < totalPages - 1;
     const hasPrevious = currentPage > 0;
 
-    // Build route coordinates for visible customers only
+    // Determine which route to display based on pagination
     const routeCoordinates: [number, number][] = [];
-    routeCoordinates.push([startLatitude, startLongitude]);
 
-    visibleCustomerIds.forEach(customerId => {
-        const customer = customerMap.get(customerId);
-        if (customer) {
-            routeCoordinates.push([customer.latitude, customer.longitude]);
+    if (result.routeGeometry && result.routeGeometry.length > 0 && showAll) {
+        // If showing all customers, use full geometry
+        result.routeGeometry.forEach(point => {
+            if (point && point.length >= 2) {
+                routeCoordinates.push([point[1], point[0]]);
+            }
+        });
+        console.log(`Using full OSRM geometry with ${routeCoordinates.length} points`);
+    } else {
+        // For paginated view or no geometry, show only visible segment
+        // Always start from the starting point
+        routeCoordinates.push([startLatitude, startLongitude]);
+
+        // Add straight lines through visible customers only
+        visibleCustomerIds.forEach(customerId => {
+            const customer = customerMap.get(customerId);
+            if (customer) {
+                routeCoordinates.push([customer.latitude, customer.longitude]);
+            }
+        });
+
+        // If we're on page 2+, connect from the last customer of previous page
+        if (!showAll && currentPage > 0 && result.optimizedCustomerIds.length > 0) {
+            const prevPageLastIndex = currentPage * CUSTOMERS_PER_PAGE - 1;
+            const prevCustomerId = result.optimizedCustomerIds[prevPageLastIndex];
+            const prevCustomer = customerMap.get(prevCustomerId);
+            if (prevCustomer) {
+                // Replace starting point with previous page's last customer
+                routeCoordinates[0] = [prevCustomer.latitude, prevCustomer.longitude];
+            }
         }
-    });
 
-    // Calculate map bounds for visible customers
+        console.log(`Using straight lines for ${visibleCustomerIds.length} visible customers`);
+    }
+
+    // Calculate map bounds
     const allLatitudes = routeCoordinates.map(coord => coord[0]);
     const allLongitudes = routeCoordinates.map(coord => coord[1]);
     const bounds: [[number, number], [number, number]] = [
@@ -96,6 +123,11 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
         setShowAll(false);
         setCurrentPage(0);
     };
+
+    // Determine polyline style based on view mode
+    const polylineOptions = showAll && result.routeGeometry && result.routeGeometry.length > 0
+        ? { color: "#3388ff", weight: 4, opacity: 0.8 }  // Full route with actual road geometry
+        : { color: "#ff6b6b", weight: 3, opacity: 0.6, dashArray: "10, 10" };  // Paginated view - dashed lines
 
     return (
         <div className="route-map">
@@ -149,9 +181,9 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
             </div>
 
             <MapContainer
-                key={showAll ? 'all' : currentPage}
+                key={`${showAll ? 'all' : currentPage}-${result.routeGeometry ? 'geo' : 'straight'}`}
                 bounds={bounds}
-                style={{ height: '500px', width: '100%' }}
+                style={{ height: '700px', width: '100%' }}
                 className="leaflet-container"
             >
                 <TileLayer
@@ -160,7 +192,7 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
 
                 <Polyline
                     positions={routeCoordinates}
-                    pathOptions={{ color: "#3388ff", weight: 4, opacity: 0.7 }}
+                    pathOptions={polylineOptions}
                 />
 
                 <Marker
@@ -198,6 +230,14 @@ const RouteMap: React.FC<RouteMapProps> = ({ startLatitude, startLongitude, cust
                     );
                 })}
             </MapContainer>
+
+            {result.routeGeometry && (
+                <div style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+                    ℹ️ {showAll
+                    ? `Showing full route with actual roads (${result.routeGeometry.length} geometry points)`
+                    : `Showing segment for current ${visibleCustomerIds.length} customers (straight lines)`}
+                </div>
+            )}
         </div>
     );
 };

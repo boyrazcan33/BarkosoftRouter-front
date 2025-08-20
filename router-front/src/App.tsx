@@ -119,10 +119,7 @@ const AppContent: React.FC = () => {
                 </div>
             )}
 
-            {state.result && (
-                <ResultsDisplay result={state.result} />
-            )}
-
+            {/* MAP MOVED UP AND DISPLAYED FIRST */}
             {state.result && state.uploadedData && (
                 <RouteMap
                     startLatitude={state.uploadedData.startLatitude}
@@ -130,6 +127,11 @@ const AppContent: React.FC = () => {
                     customers={state.uploadedData.customers}
                     result={state.result}
                 />
+            )}
+
+            {/* JSON RESULTS DISPLAYED AFTER MAP */}
+            {state.result && (
+                <ResultsDisplay result={state.result} />
             )}
           </main>
 
