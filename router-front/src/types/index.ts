@@ -17,7 +17,8 @@ export interface RouteResponse {
     optimizedCustomerIds: number[];
     totalDistance: string;
     status: string;
-    routeGeometry?: number[][]; // Added: [longitude, latitude] pairs for the route path
+    routeGeometry?: number[][]; // [longitude, latitude] pairs for the route path
+    customerGeometryMapping?: Record<number, [number, number]>; // Maps customer ID to [startIndex, endIndex] in routeGeometry
 }
 
 // Component state types

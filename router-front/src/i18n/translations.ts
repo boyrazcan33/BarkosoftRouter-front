@@ -31,6 +31,7 @@ export interface Translations {
     previous: string;
     next: string;
     showAll: string;
+    showSegments: string;
     startingPointMarker: string;
     coordinate: string;
 
@@ -93,6 +94,7 @@ export const translations: Record<string, Translations> = {
         previous: "← Previous 20",
         next: "Next 20 →",
         showAll: "Show All",
+        showSegments: "Show Segments",
         startingPointMarker: "Start",
         coordinate: "Coordinate:",
 
@@ -153,6 +155,7 @@ export const translations: Record<string, Translations> = {
         previous: "← Önceki 20",
         next: "Sonraki 20 →",
         showAll: "Tümünü Göster",
+        showSegments: "Segmentleri Göster",
         startingPointMarker: "Başlangıç",
         coordinate: "Koordinat:",
 
